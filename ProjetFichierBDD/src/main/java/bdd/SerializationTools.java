@@ -17,8 +17,25 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static byte[] serialize(Serializable o) throws IOException {
-		//TODO complete
-		return null;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(bos);
+			oos.writeObject(o);
+			oos.flush();
+			byte[] tabByte = bos.toByteArray();
+			return tabByte;
+		} catch (IOException exception) {
+			exception.printStackTrace();
+			throw exception;
+		} finally {
+			try	{
+				bos.close();
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
+
 	}
 
 	/**
@@ -29,8 +46,17 @@ class SerializationTools {
 	 * @throws ClassNotFoundException si un problème lors de la déserialisation s'est produit
 	 */
 	static Serializable deserialize(byte[] data) throws IOException, ClassNotFoundException {
-		//TODO complete
-		return null;
+		ByteArrayInputStream bis = new ByteArrayInputStream(data);
+		ObjectInput in = null;
+		try {
+			in = new ObjectInputStream(bis);
+			Object o = in.readObject();
+			return (Serializable) o;
+		} catch (IOException exception) {
+			throw exception;
+		} catch (ClassNotFoundException exception) {
+			throw exception;
+		}
 	}
 
 	/**
