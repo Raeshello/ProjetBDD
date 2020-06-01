@@ -73,8 +73,19 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static byte[] serializeFreeSpaceIntervals(TreeSet<BDD.FreeSpaceInterval> freeSpaceIntervals) throws IOException {
-		//TODO complete
-		return null;
+		try{
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(bos);
+
+			for (BDD.FreeSpaceInterval value : freeSpaceIntervals){
+				dos.writeLong(value.getStartPosition());
+				dos.writeLong(value.getLength());
+			}
+			byte[] tab = bos.toByteArray();
+			return tab;
+		} catch (IOException exception){
+			throw exception;
+		}
 	}
 
 	/**
@@ -84,7 +95,14 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static TreeSet<BDD.FreeSpaceInterval> deserializeFreeSpaceIntervals(byte[] data) throws IOException {
-		//TODO complete
+		try{
+			ByteArrayInputStream bis = new ByteArrayInputStream(data);
+			DataInputStream dis = new DataInputStream(bis);
+			ObjectInput in = new ObjectInputStream(bis);
+			//Object o = in.readObject();
+		} catch (IOException exception) {
+			throw exception;
+		}
 		return null;
 	}
 }
