@@ -1,6 +1,7 @@
 package bdd;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.TreeSet;
 
 /**
@@ -10,6 +11,10 @@ import java.util.TreeSet;
  * @version 1.0
  */
 class SerializationTools {
+	public static long convertToLong(byte[] array) {
+		ByteBuffer buffer = ByteBuffer.wrap(array);
+		return buffer.getLong();
+	}
 	/**
 	 * Serialise/binarise l'objet passé en paramètre pour retourner un tableau binaire
 	 * @param o l'objet à serialiser
@@ -17,23 +22,20 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static byte[] serialize(Serializable o) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = null;
+		/*ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = null;*/
 		try {
-			oos = new ObjectOutputStream(bos);
-			oos.writeObject(o);
-			oos.flush();
-			byte[] tabByte = bos.toByteArray();
-			return tabByte;
+			if(o != null){
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ObjectOutput output = new ObjectOutputStream(bos);
+				output.writeObject(o);
+				return bos.toByteArray();
+			} else {
+				throw new NullPointerException();
+			}
 		} catch (IOException exception) {
 			exception.printStackTrace();
 			throw exception;
-		} finally {
-			try	{
-				bos.close();
-			} catch (IOException exception) {
-				exception.printStackTrace();
-			}
 		}
 
 	}
@@ -46,16 +48,12 @@ class SerializationTools {
 	 * @throws ClassNotFoundException si un problème lors de la déserialisation s'est produit
 	 */
 	static Serializable deserialize(byte[] data) throws IOException, ClassNotFoundException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(data);
-		ObjectInput in = null;
-		try {
-			in = new ObjectInputStream(bis);
-			Object o = in.readObject();
-			return (Serializable) o;
-		} catch (IOException exception) {
-			throw exception;
-		} catch (ClassNotFoundException exception) {
-			throw exception;
+		if(data != null){
+			ByteArrayInputStream bis = new ByteArrayInputStream(data);
+			ObjectInput in = new ObjectInputStream(bis);
+			return (Serializable) in.readObject();
+		} else {
+			throw new NullPointerException();
 		}
 	}
 
@@ -73,18 +71,22 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static byte[] serializeFreeSpaceIntervals(TreeSet<BDD.FreeSpaceInterval> freeSpaceIntervals) throws IOException {
-		try{
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(bos);
-
-			for (BDD.FreeSpaceInterval value : freeSpaceIntervals){
-				dos.writeLong(value.getStartPosition());
-				dos.writeLong(value.getLength());
+		try {
+			if (freeSpaceIntervals != null){
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				DataOutputStream dos = new DataOutputStream(bos);
+				for (BDD.FreeSpaceInterval value : freeSpaceIntervals) {
+					dos.writeLong(value.getStartPosition());
+					dos.writeLong(value.getLength());
+				}
+				byte[] tab = bos.toByteArray();
+				return tab;
+			} else {
+				throw new NullPointerException();
 			}
-			byte[] tab = bos.toByteArray();
-			return tab;
-		} catch (IOException exception){
-			throw exception;
+		}
+		catch (IOException e){
+			throw e;
 		}
 	}
 
@@ -95,14 +97,18 @@ class SerializationTools {
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	static TreeSet<BDD.FreeSpaceInterval> deserializeFreeSpaceIntervals(byte[] data) throws IOException {
-		try{
+		if(data != null){
 			ByteArrayInputStream bis = new ByteArrayInputStream(data);
-			DataInputStream dis = new DataInputStream(bis);
-			ObjectInput in = new ObjectInputStream(bis);
-			//Object o = in.readObject();
-		} catch (IOException exception) {
-			throw exception;
+			TreeSet<BDD.FreeSpaceInterval> tree = new TreeSet<BDD.FreeSpaceInterval>();
+			byte[] tab = new byte[8];
+			byte[] tab2 = new byte[8];
+			while(bis.read(tab)!=-1&&bis.read(tab2)!=-1)
+			{
+				tree.add(new BDD.FreeSpaceInterval(convertToLong(tab),convertToLong(tab2)));
+			}
+			return tree;
+		} else {
+			throw new NullPointerException();
 		}
-		return null;
 	}
 }

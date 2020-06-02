@@ -127,8 +127,11 @@ public class BDD implements AutoCloseable{
 	 */
 	public void putObject(String objectName, Serializable object) throws IOException {//a verifier
 		try{
-			SerializationTools laSerialization = new SerializationTools();
-			this.putData(objectName, laSerialization.serialize(object));
+			if(object!=null)
+				this.putData(objectName, SerializationTools.serialize(object));
+			else{
+				throw new NullPointerException();
+			}
 		} catch (IOException exception) {
 			throw exception;
 		}
@@ -181,8 +184,14 @@ public class BDD implements AutoCloseable{
 	 * @throws ClassNotFoundException si l'object n'a pas pu être désérialisé
 	 */
 	public Serializable getObject(String objectName) throws IOException, ClassNotFoundException {
-		//TODO complete
-		return null;
+		if (objectName == null) throw new NullPointerException();
+		Long test = links.get(objectName);
+		if (test == null) return null;
+		else {
+			byte[] data = readData(test);
+			return SerializationTools.deserialize(data);
+		}
+
 	}
 
 	/**
@@ -212,8 +221,8 @@ public class BDD implements AutoCloseable{
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	private long findPosition(byte[] array) throws IOException {
-		//TODO complete
-		return -1;
+		return findPosition(array.length+4);//le +4 correspond au int ou l'on sauvegardera la taille de l'array au début de l'objet
+
 	}
 	/**
 	 * Cette fonction trouve une position libre dans le fichier {@link #raf} où enregistrer des données binaires dont la taille est donnée en paramètre.
@@ -224,8 +233,11 @@ public class BDD implements AutoCloseable{
 	 * @throws IOException si un problème d'entrée/sortie se produit
 	 */
 	private long findPosition(long desiredLength) throws IOException {
-		//TODO complete
-		return -1;
+		Long l = findPositionIntoFreeSpace(desiredLength);
+		if(l!=null)return l;
+		else{
+			return raf.length();
+		}
 	}
 
 	/**
@@ -255,12 +267,16 @@ public class BDD implements AutoCloseable{
 	 */
 	public boolean removeObject(String objectName) throws IOException {
 		try {
-			Long pos = links.get(objectName);
-			if(pos!=null) {
-				removeObject(pos);
-				return true;
+			if(objectName!=null) {
+				Long pos = links.remove(objectName);
+				if (pos != null) {
+					removeObject(pos);
+					return true;
+				} else return false;
 			}
-			else return false;
+			else{
+				throw new NullPointerException();
+			}
 		}
 		catch (IOException e){
 			throw e;
